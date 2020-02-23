@@ -422,6 +422,16 @@
                 })
                 .attr("cy", function(d) 
                 {
+                    return height + "em";
+                })
+                .attr("r", function(d) 
+                {
+                    return "0em";
+                })
+                .transition()
+                .duration(500)
+                .attr("cy", function(d) 
+                {
                     return (height - (d * config.scale)) + "em";
                 })
                 .attr("r", function(d) 
@@ -454,11 +464,28 @@
                         val = dataSet.stats[i - 1];
                     }
 
-                    return (height - (val * config.scale)) + "em";
+                    return height + "em";
                 })
                 .attr("x2", function(d, i) 
                 {
                     return ((i * (config.dataWidth + config.dataSpacing)) + 2 + (config.dataWidth / 2)) + "em";
+                })
+                .attr("y2", function(d) 
+                {
+                    return height + "em";
+                })
+                .transition()
+                .duration(500)
+                .attr("y1", function(d, i) 
+                {
+                    var val = d;
+
+                    if (i > 0)
+                    {
+                        val = dataSet.stats[i - 1];
+                    }
+
+                    return (height - (val * config.scale)) + "em";
                 })
                 .attr("y2", function(d) 
                 {
