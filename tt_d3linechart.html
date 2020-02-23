@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>D3 Line Chart</title>
+
+        <style>
+            body
+            {
+                font-size: 12px;
+                font-family: arial;
+            }
+
+            .lineDashboard
+            {
+                height: 2em;
+                width: 100%;
+                text-align: center;
+            }
+
+            .lineChart
+            {
+                outline: 1px solid #000000;
+                background-color: rgba(200, 0, 0, 1);
+            }
+
+            .lineChartContainer
+            {
+                margin: 0 auto 0 auto;
+            }
+
+            .lineScaleSvg
+            {
+                width: 5em;
+                height: 20em;
+                float: left;
+                background-color: rgba(0, 255, 0, 0);
+            }
+
+            .lineScaleSvg text
+            {
+                fill: rgba(255, 255, 0, 1);
+                text-anchor: end;
+                font-size: 0.5em;
+            } 
+
+            .lineChartSvg
+            {
+                width: 20em;
+                height: 20em;
+                float: left;
+                background-color: rgba(0, 0, 255, 0);
+            }
+
+            .lineChartSvg text
+            {
+                fill: rgba(255, 255, 0, 1);
+                text-anchor: middle;
+                font-weight: bold;
+            }  
+
+            .lineChartSvg circle
+            {
+                fill: rgba(255, 255, 0, 1);
+            }
+
+            .lineFillerSvg
+            {
+                width: 5em;
+                height: 3em;
+                float: left;
+                background-color: rgba(0, 0, 0, 0);
+            }
+
+            .lineLegendSvg
+            {
+                width: 20em;
+                height: 3em;
+                float: left;
+                background-color: rgba(255, 0, 0, 0);
+            }
+
+            .lineLegendSvg text
+            {
+                fill: rgba(255, 255, 0, 1);
+                text-anchor: middle;
+                font-weight: bold;
+            }  
+
+            .lineChartDataMean
+            {
+                stroke: rgba(0, 0, 0, 1);
+                stroke-width: 1px;
+                stroke-dasharray: 1, 5;
+            }  
+
+            .lineChartLine
+            {
+                stroke: rgba(255, 255, 0, 1);
+                stroke-width: 1px;
+            }   
+
+            .lineChartDataLine
+            {
+                stroke: rgba(255, 255, 0, 1);
+                stroke-width: 2px;
+            }
+
+            .lineChartFadedLine
+            {
+                fill: rgba(255, 255, 0, 0.2);
+                stroke-width: 0px;
+                height: 1px;
+            }       
+        </style>
+
+        <script src="https://d3js.org/d3.v3.min.js"></script>
+    </head>
+
+    <body>
+        <div class="lineChartContainer">
+            <div class="lineDashboard">
+                <select id="ddlPlayer">
+
+                </select>
+
+                <select id="ddlStat">
+
+                </select>
+            </div>
+
+            <div class="lineChart">
+                <svg class="lineScaleSvg">
+
+                </svg>
+
+                <svg class="lineChartSvg">
+
+                </svg>
+
+                <br style="clear:both"/>
+
+                <svg class="lineFillerSvg">
+
+                </svg>
+
+                <svg class="lineLegendSvg">
+
+                </svg>
+            </div>
+        </div>
+
+        <script>
+        var graphData = 
+        {
+            "cols":
+            [
+                {
+                    "title": "Adam Lallana",
+                    "stats": 
+                    [
+                        {"year": 2015, "goals": 7, "appearances": 49},
+                        {"year": 2016, "goals": 8, "appearances": 35},
+                        {"year": 2017, "goals": 0, "appearances": 15},
+                        {"year": 2018, "goals": 0, "appearances": 16}
+                    ]
+                },
+                {
+                    "title": "Sadio Mané",
+                    "stats": 
+                    [
+                        {"year": 2016, "goals": 13, "appearances": 29},
+                        {"year": 2017, "goals": 20, "appearances": 44},
+                        {"year": 2018, "goals": 26, "appearances": 50}
+                    ]
+                },
+                {
+                    "title": "Roberto Firminho",
+                    "stats": 
+                    [
+                        {"year": 2015, "goals": 11, "appearances": 49},
+                        {"year": 2016, "goals": 12, "appearances": 41},
+                        {"year": 2017, "goals": 27, "appearances": 54},
+                        {"year": 2018, "goals": 16, "appearances": 48}
+                    ]
+                },
+                {
+                    "title": "Divock Origi",
+                    "stats": 
+                    [
+                        {"year": 2015, "goals": 10, "appearances": 33},
+                        {"year": 2016, "goals": 11, "appearances": 43},
+                        {"year": 2017, "goals": 0, "appearances": 1},
+                        {"year": 2018, "goals": 7, "appearances": 21}
+                    ]
+                },
+                {
+                    "title": "Daniel Sturridge",
+                    "stats": 
+                    [
+                        {"year": 2015, "goals": 13, "appearances": 25},
+                        {"year": 2016, "goals": 7, "appearances": 27},
+                        {"year": 2017, "goals": 3, "appearances": 14},
+                        {"year": 2018, "goals": 4, "appearances": 27}
+                    ]
+                },
+                {
+                    "title": "James Milner",
+                    "stats": 
+                    [
+                        {"year": 2015, "goals": 7, "appearances": 45},
+                        {"year": 2016, "goals": 7, "appearances": 40},
+                        {"year": 2017, "goals": 1, "appearances": 47},
+                        {"year": 2018, "goals": 7, "appearances": 45}
+                    ]
+                },
+            ],
+            "rows": [2015, 2016, 2017, 2018],
+            "stats": ["goals", "appearances"]
+        }; 
+
+        var config = 
+        {
+            "scale": 0.5,
+            "dataWidth": 0.5,
+            "dataSpacing": 10,
+            "scaleWidth": 6,
+            "legendHeight": 4,
+            "max": 0,
+            "meanGoals": 0,
+            "meanAppearances": 0,
+            "getChartHeight": function()
+            {
+                return (this.max * this.scale * 1.5);
+            },
+            "getChartWidth": function(datalength)
+            {
+                return (datalength * (this.dataWidth + this.dataSpacing)) + (datalength * 0.5);
+            },
+            "setData": function ()
+            {
+                var player = d3.select("#ddlPlayer").node().value;
+                var stat = d3.select("#ddlStat").node().value;
+
+                var dataSet = 
+                {
+                  "labels": [],
+                  "stats": []
+                };
+
+                var filtered = graphData.cols.filter(function(x) { return x.title == player;});
+
+                for (var i = 0; i < filtered[0].stats.length;  i++)
+                {
+                    dataSet.labels.push(filtered[0].stats[i].year);
+                    dataSet.stats.push(filtered[0].stats[i][stat]);
+                }
+
+                config.mean = d3.mean(dataSet.stats, function(d) { return d; });
+
+                var container = d3.select(".lineChartContainer");
+                var wrapper = d3.select(".lineChart");
+                var scale = d3.select(".lineScaleSvg");
+                var chart = d3.select(".lineChartSvg");
+                var legend = d3.select(".lineLegendSvg");
+                var filler = d3.select(".lineFillerSvg");
+
+                var height = config.getChartHeight();
+                var width = config.getChartWidth(graphData.rows.length);
+
+                container
+                .style("width", function(d) 
+                {
+                    return (width + config.scaleWidth) + "em";
+                });
+
+                wrapper
+                .style("height", function(d) 
+                {
+                    return (height + config.legendHeight) + "em";
+                }); 
+
+                scale
+                .style("width", function(d) 
+                {
+                    return config.scaleWidth + "em";
+                })
+                .style("height", function(d) 
+                {
+                    return height + "em";
+                })
+                .html("");
+                
+                chart
+                .style("height", function(d) 
+                {
+                    return height + "em";
+                })
+                .style("width", function(d) 
+                {
+                    return width + "em";
+                }) 
+                .html("");
+
+                legend
+                .style("height", function(d) 
+                {
+                    return config.legendHeight + "em";
+                }) 
+                .style("width", function(d) 
+                {
+                    return width + "em";
+                }) 
+                .html(""); 
+
+                filler
+                .style("width", function(d) 
+                {
+                    return config.scaleWidth + "em";
+                })
+                .style("height", function(d) 
+                {
+                    return config.legendHeight + "em";
+                });
+
+                var scaleData = [];
+                var unitGrouping = 2;
+                if (config.max > 10) unitGrouping = 5;
+                if (config.max > 20) unitGrouping = 10;
+
+                for (var i = 0; i < (config.max * 1.5); i += unitGrouping)
+                {
+                    scaleData.push(i);
+                }
+
+                scale.selectAll("line")
+                .data(scaleData)
+                .enter()
+                .append("line")
+                .attr("class", function(d) 
+                {
+                    return (d == 0 ? "" : "lineChartLine");
+                }) 
+                .attr("x1", function(d) 
+                {
+                    return (config.scaleWidth - 1) + "em";
+                })
+                .attr("y1", function(d) 
+                {
+                    return (height - (d * config.scale)) + "em";
+                })
+                .attr("x2", function(d) 
+                {
+                    return config.scaleWidth + "em";
+                })
+                .attr("y2", function(d) 
+                {
+                    return (height - (d * config.scale)) + "em";
+                });
+
+                scale.selectAll("text")
+                .data(scaleData)
+                .enter()
+                .append("text")
+                .attr("x", function(d) 
+                {
+                    return (config.scaleWidth + 1) + "em";
+                })
+                .attr("y", function(d) 
+                {
+                    return ((height * 2) - ((d * config.scale * 2) - 0.25)) + "em";
+                })
+                .text(function(d) 
+                {
+                    return (d == 0 ? "" : d);
+                });
+
+                scale
+                .append("line")
+                .attr("class", "lineChartLine")
+                .attr("x1", function(d) 
+                {
+                    return config.scaleWidth + "em";
+                })
+                .attr("y1", function(d) 
+                {
+                    return "0em";
+                })
+                .attr("x2", function(d) 
+                {
+                    return config.scaleWidth + "em";
+                })
+                .attr("y2", function(d) 
+                {
+                    return height + "em";
+                });
+
+                chart.selectAll("rect")
+                .data(scaleData)
+                .enter()
+                .append("rect")
+                .attr("class", "lineChartFadedLine")
+                .attr("x", function(d) 
+                {
+                    return "0em";
+                })
+                .attr("y", function(d) 
+                {
+                    return (height - (d * config.scale)) + "em";
+                })
+                .attr("width", function(d) 
+                {
+                    return width + "em";
+                });
+
+                chart.selectAll("circle")
+                .data(dataSet.stats)
+                .enter()
+                .append("circle")
+                .attr("cx", function(d, i) 
+                {
+                    return ((i * (config.dataWidth + config.dataSpacing)) + 2 + (config.dataWidth / 2)) + "em";
+                })
+                .attr("cy", function(d) 
+                {
+                    return (height - (d * config.scale)) + "em";
+                })
+                .attr("r", function(d) 
+                {
+                    return (config.dataWidth) + "em";
+                });
+
+                chart.selectAll("line")
+                .data(dataSet.stats)
+                .enter()
+                .append("line")
+                .attr("class", "lineChartDataLine")
+                .attr("x1", function(d, i) 
+                {
+                    var val = i;
+
+                    if (i > 0)
+                    {
+                        val = val - 1;                   
+                    }
+
+                    return ((val * (config.dataWidth + config.dataSpacing)) + 2 + (config.dataWidth / 2)) + "em";
+                })
+                .attr("y1", function(d, i) 
+                {
+                    var val = d;
+
+                    if (i > 0)
+                    {
+                        val = dataSet.stats[i - 1];
+                    }
+
+                    return (height - (val * config.scale)) + "em";
+                })
+                .attr("x2", function(d, i) 
+                {
+                    return ((i * (config.dataWidth + config.dataSpacing)) + 2 + (config.dataWidth / 2)) + "em";
+                })
+                .attr("y2", function(d) 
+                {
+                    return (height - (d * config.scale)) + "em";
+                });
+
+                chart.selectAll("text")
+                .data(dataSet.stats)
+                .enter()
+                .append("text")
+                .attr("x", function(d, i) 
+                {
+                    return ((i * (config.dataWidth + config.dataSpacing)) + 2 + (config.dataWidth / 2)) + "em";
+                })
+                .attr("y", function(d) 
+                {
+                    return (height - (d * config.scale) - 1) + "em";
+                })
+                .text(function(d) 
+                {
+                    return d;
+                });
+
+                chart
+                .append("line")
+                .attr("class", "lineChartDataMean")
+                .attr("x1", function(d) 
+                {
+                    return "0em";
+                })
+                .attr("y1", function(d) 
+                {
+                    return (height - (config.meanGoals * config.scale)) + "em";
+                })
+                .attr("x2", function(d) 
+                {
+                    return width + "em";
+                })
+                .attr("y2", function(d) 
+                {
+                    return (height - (config.meanGoals * config.scale)) + "em";
+                });
+
+                legend.selectAll("text")
+                .data(dataSet.labels)
+                .enter()
+                .append("text")
+                .attr("x", function(d, i) 
+                {
+                    return ((i * (config.dataWidth + config.dataSpacing)) + 2 + (config.dataWidth / 2)) + "em";
+                })
+                .attr("y", function(d) 
+                {
+                    return "1em";
+                })
+                .text(function(d) 
+                {
+                    return d;
+                });
+
+                legend
+                .append("line")
+                .attr("class", "lineChartLine")
+                .attr("x1", function(d) 
+                {
+                    return "0em";
+                })
+                .attr("y1", function(d) 
+                {
+                    return "0em";
+                })
+                .attr("x2", function(d) 
+                {
+                    return width + "em";
+                })
+                .attr("y2", function(d) 
+                {
+                    return "0em";
+                });
+            }
+        };
+
+        config.max = d3.max(graphData.cols, function(d) 
+        {
+            var maxStat = d3.max(d.stats, function(x) 
+            {
+                return (x.goals > x.appearances ? x.goals : x.appearances);
+            }
+            );
+
+            return maxStat; 
+        }
+        );
+
+        var ddlPlayer = d3.select("#ddlPlayer");
+
+        ddlPlayer.selectAll("option")
+        .data(graphData.cols)
+        .enter()
+        .append("option")
+        .property("selected", function(d, i) 
+        {
+            return i == 0;
+        })
+        .attr("value", function(d) 
+        {
+            return d.title;
+        })
+        .text(function(d) 
+        {
+            return d.title;
+        });
+
+        var ddlStat = d3.select("#ddlStat");
+
+        ddlStat.selectAll("option")
+        .data(graphData.stats)
+        .enter()
+        .append("option")
+        .property("selected", function(d, i) 
+        {
+            return i == 0;
+        })
+        .attr("value", function(d) 
+        {
+            return d;
+        })
+        .text(function(d) 
+        {
+            return d;
+        });
+
+        config.setData();
+
+        d3.select("#ddlPlayer").on("change", function() { config.setData(); });
+        d3.select("#ddlStat").on("change", function() { config.setData(); });
+        </script>
+    </body>
+</html> 
