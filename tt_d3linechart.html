@@ -107,9 +107,8 @@
 
             .lineChartFadedLine
             {
-                fill: rgba(255, 255, 0, 0.2);
-                stroke-width: 0px;
-                height: 1px;
+                stroke: rgba(255, 255, 0, 0.2);
+                stroke-width: 1px;
             }       
         </style>
 
@@ -394,22 +393,26 @@
                     return height + "em";
                 });
 
-                chart.selectAll("rect")
+                chart.selectAll("line")
                 .data(scaleData)
                 .enter()
-                .append("rect")
+                .append("line")
                 .attr("class", "lineChartFadedLine")
-                .attr("x", function(d) 
+                .attr("x1", function(d) 
                 {
                     return "0em";
                 })
-                .attr("y", function(d) 
+                .attr("y1", function(d) 
                 {
                     return (height - (d * config.scale)) + "em";
                 })
-                .attr("width", function(d) 
+                .attr("x2", function(d) 
                 {
                     return width + "em";
+                })
+                .attr("y2", function(d) 
+                {
+                    return (height - (d * config.scale)) + "em";
                 });
 
                 chart.selectAll("circle")
@@ -439,7 +442,7 @@
                     return (config.dataWidth) + "em";
                 });
 
-                chart.selectAll("line")
+                chart.selectAll("line.lineChartDataLine")
                 .data(dataSet.stats)
                 .enter()
                 .append("line")
