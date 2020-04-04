@@ -109,7 +109,7 @@
             {
                 stroke: rgba(255, 255, 0, 0.2);
                 stroke-width: 1px;
-            }       
+            }        
         </style>
 
         <script src="https://d3js.org/d3.v3.min.js"></script>
@@ -225,8 +225,7 @@
             "scaleWidth": 6,
             "legendHeight": 4,
             "max": 0,
-            "meanGoals": 0,
-            "meanAppearances": 0,
+            "mean": 0,
             "getChartHeight": function()
             {
                 return (this.max * this.scale * 1.5);
@@ -264,7 +263,7 @@
                 var filler = d3.select(".lineFillerSvg");
 
                 var height = config.getChartHeight();
-                var width = config.getChartWidth(graphData.rows.length);
+                var width = config.getChartWidth(graphData.cols.length);
 
                 container
                 .style("width", function(d) 
@@ -458,16 +457,9 @@
 
                     return ((val * (config.dataWidth + config.dataSpacing)) + 2 + (config.dataWidth / 2)) + "em";
                 })
-                .attr("y1", function(d, i) 
+                .attr("y1", function(d) 
                 {
-                    var val = d;
-
-                    if (i > 0)
-                    {
-                        val = dataSet.stats[i - 1];
-                    }
-
-                    return height + "em";
+                   return height + "em";
                 })
                 .attr("x2", function(d, i) 
                 {
@@ -475,7 +467,7 @@
                 })
                 .attr("y2", function(d) 
                 {
-                    return height + "em";
+                   return height + "em";
                 })
                 .transition()
                 .duration(500)
@@ -521,7 +513,7 @@
                 })
                 .attr("y1", function(d) 
                 {
-                    return (height - (config.meanGoals * config.scale)) + "em";
+                    return (height - (config.mean * config.scale)) + "em";
                 })
                 .attr("x2", function(d) 
                 {
@@ -529,7 +521,7 @@
                 })
                 .attr("y2", function(d) 
                 {
-                    return (height - (config.meanGoals * config.scale)) + "em";
+                    return (height - (config.mean * config.scale)) + "em";
                 });
 
                 legend.selectAll("text")
@@ -542,7 +534,7 @@
                 })
                 .attr("y", function(d) 
                 {
-                    return "1em";
+                    return config.dataSpacing + "em";
                 })
                 .text(function(d) 
                 {
